@@ -9,5 +9,4 @@ public class SpringBootJpaPostgresqlApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootJpaPostgresqlApplication.class, args);
 	}
-
 }
