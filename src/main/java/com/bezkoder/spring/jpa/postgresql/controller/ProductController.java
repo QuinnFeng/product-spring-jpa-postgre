@@ -1,7 +1,10 @@
 package com.bezkoder.spring.jpa.postgresql.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.EntityNotFoundException;
 
 import com.bezkoder.spring.jpa.postgresql.model.Product;
 import com.bezkoder.spring.jpa.postgresql.service.ProductService;
@@ -9,7 +12,7 @@ import com.bezkoder.spring.jpa.postgresql.service.ProductService;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -37,11 +40,14 @@ public class ProductController {
 
     // Delete a product by ID
     @DeleteMapping("/{id}")
-    public String deleteProductById(@PathVariable int id) {
-        productService.deleteProductById(id);
-        return "Product deleted successfully!";
+    public ResponseEntity<Void> deleteProductById(@PathVariable int id) {
+        try {
+            productService.deleteProductById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
-
     // Update stock of a product
     @PutMapping("/{id}/stock")
     public Product updateProductStock(@PathVariable int id, @RequestParam int newStock) {
@@ -52,5 +58,11 @@ public class ProductController {
     @GetMapping("/brand/{brand}")
     public List<Product> getProductsByBrand(@PathVariable String brand) {
         return productService.getProductsByBrand(brand);
+    }
+    
+    @PostMapping("/bulk-insert")
+    public ResponseEntity<List<Product>> insertProducts(@RequestBody List<Product> products) {
+        List<Product> insertedProducts = productService.insertProducts(products);
+        return new ResponseEntity<>(insertedProducts, HttpStatus.CREATED);
     }
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException;
 
 import com.bezkoder.spring.jpa.postgresql.model.Product;
 import com.bezkoder.spring.jpa.postgresql.repository.ProductRepository;
@@ -34,7 +35,11 @@ public class ProductService {
 
     // Delete a Product by ID
     public void deleteProductById(int id) {
-        productRepository.deleteById(id);
+        if (productRepository.existsById(id)) {
+            productRepository.deleteById(id);
+        } else {
+            throw new EntityNotFoundException("Product with ID " + id + " not found.");
+        }
     }
 
     // Update stock of a Product
@@ -51,6 +56,11 @@ public class ProductService {
     // Retrieve Products by brand (additional method for filtering)
     public List<Product> getProductsByBrand(String brand) {
         return productRepository.findByBrand(brand);
+    }
+    
+    public List<Product> insertProducts(List<Product> products) {
+        // Save all products in a batch operation
+        return productRepository.saveAll(products);
     }
 }
 
